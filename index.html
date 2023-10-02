@@ -1,0 +1,628 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2023-10-01 Sun 19:15 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Move Bootcamp</title>
+<meta name="author" content="Dang Quang Vu" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/readtheorg.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/js/readtheorg.js"></script>
+<style>pre.src{background:#343131;color:white;} </style>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Move Bootcamp</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orge117192">1. Basic Types of Object</a>
+<ul>
+<li><a href="#org3b567cb">1.1. Object by Owner &amp; Object by Object</a>
+<ul>
+<li><a href="#org3452015">1.1.1. In Code</a></li>
+<li><a href="#org6c2235f">1.1.2. Transfer Owner Objects</a></li>
+<li><a href="#org0c569a5">1.1.3. impl Transfer Owner Objects</a></li>
+</ul>
+</li>
+<li><a href="#orgb05a428">1.2. Shared Object</a>
+<ul>
+<li><a href="#orga99a178">1.2.1. In Code</a></li>
+<li><a href="#orge866d0f">1.2.2. Transfer Shared Objects</a></li>
+<li><a href="#org5935ee1">1.2.3. impl Transfer Shared Objects</a></li>
+</ul>
+</li>
+<li><a href="#org9c2f14a">1.3. Immutable Object</a>
+<ul>
+<li><a href="#orgbbbbc06">1.3.1. In Code</a></li>
+<li><a href="#org3bc4fb6">1.3.2. Transfer Immutable Objects</a></li>
+<li><a href="#org8d6cb34">1.3.3. Impl Transfer Immutable Objects</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orgbe617ed">2. Ability</a></li>
+<li><a href="#orgb336187">3. CRUD Features</a>
+<ul>
+<li><a href="#org0634b30">3.1. Create</a></li>
+<li><a href="#org69fb8be">3.2. Read</a></li>
+<li><a href="#org0c12088">3.3. Update</a></li>
+<li><a href="#org3c91857">3.4. Delete</a></li>
+<li><a href="#orgff980fe">3.5. Change type of Ownership</a></li>
+</ul>
+</li>
+<li><a href="#orgc63c56b">4. Flexible Objects</a>
+<ul>
+<li><a href="#orgba0027c">4.1. Wrapping object</a></li>
+<li><a href="#org4f737ea">4.2. Wrap</a></li>
+<li><a href="#org633811c">4.3. Unwrap</a></li>
+</ul>
+</li>
+<li><a href="#org661b6b1">5. Dynamic Objects</a>
+<ul>
+<li><a href="#orga05bd03">5.1. Dynamic Object Field</a></li>
+<li><a href="#org7acda9c">5.2. Mutate Dynamic Object</a></li>
+</ul>
+</li>
+<li><a href="#org2a5ddb1">6. Generic Styles</a>
+<ul>
+<li><a href="#org8579a45">6.1. In Rust</a></li>
+<li><a href="#orgb4cc4ff">6.2. In Sui Move</a></li>
+</ul>
+</li>
+<li><a href="#org7064433">7. Witness</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orge117192" class="outline-2">
+<h2 id="orge117192"><span class="section-number-2">1.</span> Basic Types of Object</h2>
+<div class="outline-text-2" id="text-1">
+</div>
+<div id="outline-container-org3b567cb" class="outline-3">
+<h3 id="org3b567cb"><span class="section-number-3">1.1.</span> Object by Owner &amp; Object by Object</h3>
+<div class="outline-text-3" id="text-1-1">
+</div>
+<div id="outline-container-org3452015" class="outline-4">
+<h4 id="org3452015"><span class="section-number-4">1.1.1.</span> In Code</h4>
+<div class="outline-text-4" id="text-1-1-1">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">module</span> <span style="color: #f9e2af; font-weight: bold;">eamon</span>::<span style="color: #f38ba8;">EAMON</span> <span style="color: #89b4fa;">{</span>
+    <span style="color: #cba6f7;">use</span> <span style="color: #f2cdcd;">sui</span>:<span style="color: #f9e2af; font-weight: bold;">tx_context</span>::<span style="color: #f2cdcd;">{</span><span style="color: #f38ba8;">Self</span>, <span style="color: #f38ba8;">TxContext</span><span style="color: #f2cdcd;">}</span>;
+    <span style="color: #cba6f7;">use</span> <span style="color: #f2cdcd;">sui</span>:<span style="color: #f9e2af; font-weight: bold;">transfer</span>::transfer;
+
+    <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">init</span><span style="color: #f2cdcd;">(</span><span style="color: #f2cdcd;">ctx</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">TxContext</span><span style="color: #f2cdcd;">)</span> <span style="color: #f2cdcd;">{</span>
+        <span style="color: #f9e2af; font-weight: bold;">transfer</span>::transfer<span style="color: #f38ba8;">(</span><span style="color: #89dceb;">{</span>object<span style="color: #89dceb;">}</span>, <span style="color: #f9e2af; font-weight: bold;">tx_context</span>::signer<span style="color: #89dceb;">(</span>ctx<span style="color: #89dceb;">)</span><span style="color: #f38ba8;">)</span>;
+    <span style="color: #f2cdcd;">}</span>
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6c2235f" class="outline-4">
+<h4 id="org6c2235f"><span class="section-number-4">1.1.2.</span> Transfer Owner Objects</h4>
+<div class="outline-text-4" id="text-1-1-2">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">public</span> <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">transfer</span>&lt;<span style="color: #f38ba8;">T</span>: <span style="color: #f38ba8;">key</span>&gt;<span style="color: #89b4fa;">(</span><span style="color: #f2cdcd;">obj</span>: <span style="color: #f38ba8;">T</span>, <span style="color: #f2cdcd;">recipient</span>: <span style="color: #f38ba8;">address</span><span style="color: #89b4fa;">)</span> <span style="color: #89b4fa;">{</span>
+    <span style="color: #9399b2; font-style: italic;">// </span><span style="color: #7f849c; font-style: italic;">assert ----</span>
+    <span style="color: #9399b2; font-style: italic;">// </span><span style="color: #7f849c; font-style: italic;">abort ----</span>
+    transfer_impl<span style="color: #f2cdcd;">(</span>obj, recipient<span style="color: #f2cdcd;">)</span>
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0c569a5" class="outline-4">
+<h4 id="org0c569a5"><span class="section-number-4">1.1.3.</span> impl Transfer Owner Objects</h4>
+<div class="outline-text-4" id="text-1-1-3">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">spec</span> transfer_impl <span style="color: #89b4fa;">{</span>
+    pragma opaque;
+    <span style="color: #9399b2; font-style: italic;">// </span><span style="color: #7f849c; font-style: italic;">never aborts as it requires object by-value and:</span>
+    <span style="color: #9399b2; font-style: italic;">// </span><span style="color: #7f849c; font-style: italic;">- it's OK to transfer whether object is fresh or already owned</span>
+    <span style="color: #9399b2; font-style: italic;">// </span><span style="color: #7f849c; font-style: italic;">- shared or immutable object cannot be passed by value</span>
+    aborts_if <span style="color: #f2cdcd;">[</span>abstract<span style="color: #f2cdcd;">]</span> <span style="color: #cba6f7;">false</span>;
+    modifies <span style="color: #f2cdcd;">[</span>abstract<span style="color: #f2cdcd;">]</span> global&lt;<span style="color: #f9e2af; font-weight: bold;">object</span>::<span style="color: #f38ba8;">Ownership</span>&gt;<span style="color: #f2cdcd;">(</span><span style="color: #f9e2af; font-weight: bold;">object</span>::id<span style="color: #f38ba8;">(</span>obj<span style="color: #f38ba8;">)</span>.bytes<span style="color: #f2cdcd;">)</span>;
+    ensures <span style="color: #f2cdcd;">[</span>abstract<span style="color: #f2cdcd;">]</span> exists&lt;<span style="color: #f9e2af; font-weight: bold;">object</span>::<span style="color: #f38ba8;">Ownership</span>&gt;<span style="color: #f2cdcd;">(</span><span style="color: #f9e2af; font-weight: bold;">object</span>::id<span style="color: #f38ba8;">(</span>obj<span style="color: #f38ba8;">)</span>.bytes<span style="color: #f2cdcd;">)</span>;
+    ensures <span style="color: #f2cdcd;">[</span>abstract<span style="color: #f2cdcd;">]</span> global&lt;<span style="color: #f9e2af; font-weight: bold;">object</span>::<span style="color: #f38ba8;">Ownership</span>&gt;<span style="color: #f2cdcd;">(</span><span style="color: #f9e2af; font-weight: bold;">object</span>::id<span style="color: #f38ba8;">(</span>obj<span style="color: #f38ba8;">)</span>.bytes<span style="color: #f2cdcd;">)</span>.owner == recipient;
+    ensures <span style="color: #f2cdcd;">[</span>abstract<span style="color: #f2cdcd;">]</span> global&lt;<span style="color: #f9e2af; font-weight: bold;">object</span>::<span style="color: #f38ba8;">Ownership</span>&gt;<span style="color: #f2cdcd;">(</span><span style="color: #f9e2af; font-weight: bold;">object</span>::id<span style="color: #f38ba8;">(</span>obj<span style="color: #f38ba8;">)</span>.bytes<span style="color: #f2cdcd;">)</span>.status == <span style="color: #f9e2af; font-weight: bold;">prover</span>::<span style="color: #f38ba8;">OWNED</span>;
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb05a428" class="outline-3">
+<h3 id="orgb05a428"><span class="section-number-3">1.2.</span> Shared Object</h3>
+<div class="outline-text-3" id="text-1-2">
+</div>
+<div id="outline-container-orga99a178" class="outline-4">
+<h4 id="orga99a178"><span class="section-number-4">1.2.1.</span> In Code</h4>
+<div class="outline-text-4" id="text-1-2-1">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">module</span> <span style="color: #f9e2af; font-weight: bold;">eamon</span>::<span style="color: #f38ba8;">EAMON</span> <span style="color: #89b4fa;">{</span>
+    <span style="color: #cba6f7;">use</span> <span style="color: #f2cdcd;">sui</span>:<span style="color: #f9e2af; font-weight: bold;">tx_context</span>::<span style="color: #f2cdcd;">{</span><span style="color: #f38ba8;">Self</span>, <span style="color: #f38ba8;">TxContext</span><span style="color: #f2cdcd;">}</span>;
+    <span style="color: #cba6f7;">use</span> <span style="color: #f2cdcd;">sui</span>:<span style="color: #f9e2af; font-weight: bold;">transfer</span>::transfer;
+
+    <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">init</span><span style="color: #f2cdcd;">(</span><span style="color: #f2cdcd;">ctx</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">TxContext</span><span style="color: #f2cdcd;">)</span> <span style="color: #f2cdcd;">{</span>
+        <span style="color: #f9e2af; font-weight: bold;">transfer</span>::share_object<span style="color: #f38ba8;">(</span><span style="color: #89dceb;">{</span>object<span style="color: #89dceb;">}</span>, <span style="color: #f9e2af; font-weight: bold;">tx_context</span>::signer<span style="color: #89dceb;">(</span>ctx<span style="color: #89dceb;">)</span><span style="color: #f38ba8;">)</span>;
+    <span style="color: #f2cdcd;">}</span>
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge866d0f" class="outline-4">
+<h4 id="orge866d0f"><span class="section-number-4">1.2.2.</span> Transfer Shared Objects</h4>
+<div class="outline-text-4" id="text-1-2-2">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">public</span> <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">share_object</span>&lt;<span style="color: #f38ba8;">T</span>: <span style="color: #f38ba8;">key</span>&gt;<span style="color: #89b4fa;">(</span><span style="color: #f2cdcd;">obj</span>: <span style="color: #f38ba8;">T</span><span style="color: #89b4fa;">)</span> <span style="color: #89b4fa;">{</span>
+    share_object_impl<span style="color: #f2cdcd;">(</span>obj<span style="color: #f2cdcd;">)</span>
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org5935ee1" class="outline-4">
+<h4 id="org5935ee1"><span class="section-number-4">1.2.3.</span> impl Transfer Shared Objects</h4>
+<div class="outline-text-4" id="text-1-2-3">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">spec</span> share_object_impl <span style="color: #89b4fa;">{</span>
+    pragma opaque;
+    aborts_if <span style="color: #f2cdcd;">[</span>abstract<span style="color: #f2cdcd;">]</span> <span style="color: #f9e2af; font-weight: bold;">sui</span>::<span style="color: #f9e2af; font-weight: bold;">prover</span>::owned<span style="color: #f2cdcd;">(</span>obj<span style="color: #f2cdcd;">)</span>;
+    modifies <span style="color: #f2cdcd;">[</span>abstract<span style="color: #f2cdcd;">]</span> global&lt;<span style="color: #f9e2af; font-weight: bold;">object</span>::<span style="color: #f38ba8;">Ownership</span>&gt;<span style="color: #f2cdcd;">(</span><span style="color: #f9e2af; font-weight: bold;">object</span>::id<span style="color: #f38ba8;">(</span>obj<span style="color: #f38ba8;">)</span>.bytes<span style="color: #f2cdcd;">)</span>;
+    ensures <span style="color: #f2cdcd;">[</span>abstract<span style="color: #f2cdcd;">]</span> exists&lt;<span style="color: #f9e2af; font-weight: bold;">object</span>::<span style="color: #f38ba8;">Ownership</span>&gt;<span style="color: #f2cdcd;">(</span><span style="color: #f9e2af; font-weight: bold;">object</span>::id<span style="color: #f38ba8;">(</span>obj<span style="color: #f38ba8;">)</span>.bytes<span style="color: #f2cdcd;">)</span>;
+    ensures <span style="color: #f2cdcd;">[</span>abstract<span style="color: #f2cdcd;">]</span> global&lt;<span style="color: #f9e2af; font-weight: bold;">object</span>::<span style="color: #f38ba8;">Ownership</span>&gt;<span style="color: #f2cdcd;">(</span><span style="color: #f9e2af; font-weight: bold;">object</span>::id<span style="color: #f38ba8;">(</span>obj<span style="color: #f38ba8;">)</span>.bytes<span style="color: #f2cdcd;">)</span>.status == <span style="color: #f9e2af; font-weight: bold;">prover</span>::<span style="color: #f38ba8;">SHARED</span>;
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9c2f14a" class="outline-3">
+<h3 id="org9c2f14a"><span class="section-number-3">1.3.</span> Immutable Object</h3>
+<div class="outline-text-3" id="text-1-3">
+</div>
+<div id="outline-container-orgbbbbc06" class="outline-4">
+<h4 id="orgbbbbc06"><span class="section-number-4">1.3.1.</span> In Code</h4>
+<div class="outline-text-4" id="text-1-3-1">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">module</span> <span style="color: #f9e2af; font-weight: bold;">eamon</span>::<span style="color: #f38ba8;">EAMON</span> <span style="color: #89b4fa;">{</span>
+    <span style="color: #cba6f7;">use</span> <span style="color: #f2cdcd;">sui</span>:<span style="color: #f9e2af; font-weight: bold;">tx_context</span>::<span style="color: #f2cdcd;">{</span><span style="color: #f38ba8;">Self</span>, <span style="color: #f38ba8;">TxContext</span><span style="color: #f2cdcd;">}</span>;
+    <span style="color: #cba6f7;">use</span> <span style="color: #f2cdcd;">sui</span>:<span style="color: #f9e2af; font-weight: bold;">transfer</span>::transfer;
+
+    <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">init</span><span style="color: #f2cdcd;">(</span><span style="color: #f2cdcd;">ctx</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">TxContext</span><span style="color: #f2cdcd;">)</span> <span style="color: #f2cdcd;">{</span>
+        <span style="color: #f9e2af; font-weight: bold;">transfer</span>::freeze_object<span style="color: #f38ba8;">(</span><span style="color: #89dceb;">{</span>object<span style="color: #89dceb;">}</span>, <span style="color: #f9e2af; font-weight: bold;">tx_context</span>::signer<span style="color: #89dceb;">(</span>ctx<span style="color: #89dceb;">)</span><span style="color: #f38ba8;">)</span>;
+    <span style="color: #f2cdcd;">}</span>
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org3bc4fb6" class="outline-4">
+<h4 id="org3bc4fb6"><span class="section-number-4">1.3.2.</span> Transfer Immutable Objects</h4>
+<div class="outline-text-4" id="text-1-3-2">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">public</span> <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">freeze_object</span>&lt;<span style="color: #f38ba8;">T</span>: <span style="color: #f38ba8;">key</span>&gt;<span style="color: #89b4fa;">(</span><span style="color: #f2cdcd;">obj</span>: <span style="color: #f38ba8;">T</span><span style="color: #89b4fa;">)</span> <span style="color: #89b4fa;">{</span>
+    freeze_object_impl<span style="color: #f2cdcd;">(</span>obj<span style="color: #f2cdcd;">)</span>
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8d6cb34" class="outline-4">
+<h4 id="org8d6cb34"><span class="section-number-4">1.3.3.</span> Impl Transfer Immutable Objects</h4>
+<div class="outline-text-4" id="text-1-3-3">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">spec</span> freeze_object_impl <span style="color: #89b4fa;">{</span>
+    pragma opaque;
+    <span style="color: #9399b2; font-style: italic;">// </span><span style="color: #7f849c; font-style: italic;">never aborts as it requires object by-value and:</span>
+    <span style="color: #9399b2; font-style: italic;">// </span><span style="color: #7f849c; font-style: italic;">- it's OK to freeze whether object is fresh or owned</span>
+    <span style="color: #9399b2; font-style: italic;">// </span><span style="color: #7f849c; font-style: italic;">- shared or immutable object cannot be passed by value</span>
+    aborts_if <span style="color: #f2cdcd;">[</span>abstract<span style="color: #f2cdcd;">]</span> <span style="color: #cba6f7;">false</span>;
+    modifies <span style="color: #f2cdcd;">[</span>abstract<span style="color: #f2cdcd;">]</span> global&lt;<span style="color: #f9e2af; font-weight: bold;">object</span>::<span style="color: #f38ba8;">Ownership</span>&gt;<span style="color: #f2cdcd;">(</span><span style="color: #f9e2af; font-weight: bold;">object</span>::id<span style="color: #f38ba8;">(</span>obj<span style="color: #f38ba8;">)</span>.bytes<span style="color: #f2cdcd;">)</span>;
+    ensures <span style="color: #f2cdcd;">[</span>abstract<span style="color: #f2cdcd;">]</span> exists&lt;<span style="color: #f9e2af; font-weight: bold;">object</span>::<span style="color: #f38ba8;">Ownership</span>&gt;<span style="color: #f2cdcd;">(</span><span style="color: #f9e2af; font-weight: bold;">object</span>::id<span style="color: #f38ba8;">(</span>obj<span style="color: #f38ba8;">)</span>.bytes<span style="color: #f2cdcd;">)</span>;
+    ensures <span style="color: #f2cdcd;">[</span>abstract<span style="color: #f2cdcd;">]</span> global&lt;<span style="color: #f9e2af; font-weight: bold;">object</span>::<span style="color: #f38ba8;">Ownership</span>&gt;<span style="color: #f2cdcd;">(</span><span style="color: #f9e2af; font-weight: bold;">object</span>::id<span style="color: #f38ba8;">(</span>obj<span style="color: #f38ba8;">)</span>.bytes<span style="color: #f2cdcd;">)</span>.status == <span style="color: #f9e2af; font-weight: bold;">prover</span>::<span style="color: #f38ba8;">IMMUTABLE</span>;
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbe617ed" class="outline-2">
+<h2 id="orgbe617ed"><span class="section-number-2">2.</span> Ability</h2>
+<div class="outline-text-2" id="text-2">
+<blockquote>
+<p>
+Abilities are keywords in Sui Move that define how types behave at the compiler level.
+</p>
+
+<p>
+Abilities are crucial to defining how object behave in Sui Move at the language level. Each unique combination of abilities in Sui Move is its own design pattern. We will study abitilies and how to use them in Sui Move throughout the course.
+</p>
+</blockquote>
+
+<ul class="org-ul">
+<li><code>Copy</code>: value can be copied (or cloned by value)</li>
+<li><code>Drop</code>: value can be dropped by the end of scope</li>
+<li><code>Key</code>: value can be used as a key for global storage operations</li>
+<li><code>Store</code>: value can be stored inside global storage</li>
+</ul>
+
+<blockquote>
+<p>
+Custom types that have the abilities key and store are considered to be assets in Sui Move. Assets are stored in global storage and can be transferred between accounts.
+</p>
+</blockquote>
+
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">module</span> <span style="color: #f9e2af; font-weight: bold;">eamon</span>::<span style="color: #f38ba8;">EAMON</span> <span style="color: #89b4fa;">{</span>
+    <span style="color: #cba6f7;">use</span> <span style="color: #f9e2af; font-weight: bold;">sui</span>::<span style="color: #f9e2af; font-weight: bold;">object</span>::<span style="color: #f2cdcd;">{</span><span style="color: #f38ba8;">Self</span>, <span style="color: #f38ba8;">UID</span><span style="color: #f2cdcd;">}</span>;
+
+    <span style="color: #cba6f7;">struct</span> <span style="color: #f38ba8;">Wallet</span> <span style="color: #cba6f7;">has</span> <span style="color: #f38ba8;">key</span>, <span style="color: #f38ba8;">store</span>, <span style="color: #cba6f7;">copy</span>, <span style="color: #f38ba8;">drop</span> <span style="color: #f2cdcd;">{</span>
+        <span style="color: #f2cdcd;">id</span>: <span style="color: #f38ba8;">UID</span>,
+    <span style="color: #f2cdcd;">}</span>
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb336187" class="outline-2">
+<h2 id="orgb336187"><span class="section-number-2">3.</span> CRUD Features</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org0634b30" class="outline-3">
+<h3 id="org0634b30"><span class="section-number-3">3.1.</span> Create</h3>
+<div class="outline-text-3" id="text-3-1">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">module</span> <span style="color: #f9e2af; font-weight: bold;">eamon</span>::<span style="color: #f38ba8;">EAMON</span> <span style="color: #89b4fa;">{</span>
+    <span style="color: #cba6f7;">use</span> <span style="color: #f9e2af; font-weight: bold;">sui</span>::<span style="color: #f9e2af; font-weight: bold;">object</span>::<span style="color: #f2cdcd;">{</span><span style="color: #f38ba8;">Self</span>, <span style="color: #f38ba8;">UID</span><span style="color: #f2cdcd;">}</span>;
+    <span style="color: #cba6f7;">use</span> <span style="color: #f9e2af; font-weight: bold;">sui</span>::<span style="color: #f9e2af; font-weight: bold;">tx_context</span>::<span style="color: #f2cdcd;">{</span><span style="color: #f38ba8;">Self</span>,<span style="color: #f38ba8;">TxContext</span><span style="color: #f2cdcd;">}</span>
+
+    <span style="color: #cba6f7;">struct</span> <span style="color: #f38ba8;">Wallet</span> <span style="color: #cba6f7;">has</span> <span style="color: #f38ba8;">key</span>, <span style="color: #f38ba8;">store</span> <span style="color: #f2cdcd;">{</span>
+        <span style="color: #f2cdcd;">id</span>: <span style="color: #f38ba8;">UID</span>,
+        <span style="color: #f2cdcd;">name</span>: <span style="color: #f38ba8;">vector</span>&lt;<span style="color: #f38ba8;">u8</span>&gt;,
+        <span style="color: #f2cdcd;">balance</span>: <span style="color: #f38ba8;">u128</span>,
+    <span style="color: #f2cdcd;">}</span>
+
+    <span style="color: #cba6f7;">struct</span> <span style="color: #f38ba8;">User</span> <span style="color: #cba6f7;">has</span> <span style="color: #f38ba8;">key</span> <span style="color: #f2cdcd;">{</span>
+        <span style="color: #f2cdcd;">id</span>: <span style="color: #f38ba8;">UID</span>,
+        <span style="color: #f2cdcd;">name</span>: <span style="color: #f38ba8;">String</span>,
+        <span style="color: #f2cdcd;">wallet</span>: <span style="color: #f38ba8;">Wallet</span>,
+    <span style="color: #f2cdcd;">}</span>
+
+    <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">init</span><span style="color: #f2cdcd;">(</span><span style="color: #f2cdcd;">ctx</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">TxContext</span><span style="color: #f2cdcd;">)</span> <span style="color: #f2cdcd;">{</span>
+        <span style="color: #cba6f7;">let</span> <span style="color: #f2cdcd;">wallet</span> = <span style="color: #f38ba8;">Wallet</span> <span style="color: #f38ba8;">{</span>
+            <span style="color: #f2cdcd;">id</span>: <span style="color: #f9e2af; font-weight: bold;">object</span>::new<span style="color: #89dceb;">(</span>ctx<span style="color: #89dceb;">)</span>,
+            <span style="color: #f2cdcd;">name</span>: b<span style="color: #7f849c; font-style: italic;">"Eamon"</span>,
+            <span style="color: #f2cdcd;">balance</span>: 10000000000
+        <span style="color: #f38ba8;">}</span>;
+        <span style="color: #f9e2af; font-weight: bold;">transfer</span>::transfer<span style="color: #f38ba8;">(</span>wallet, <span style="color: #f9e2af; font-weight: bold;">tx_context</span>::signer<span style="color: #89dceb;">(</span>ctx<span style="color: #89dceb;">)</span><span style="color: #f38ba8;">)</span>;
+    <span style="color: #f2cdcd;">}</span>
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org69fb8be" class="outline-3">
+<h3 id="org69fb8be"><span class="section-number-3">3.2.</span> Read</h3>
+<div class="outline-text-3" id="text-3-2">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">public</span> <span style="color: #cba6f7;">entry</span> <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">get_wallet</span><span style="color: #89b4fa;">(</span><span style="color: #f2cdcd;">wallet</span>: &amp;<span style="color: #f38ba8;">Wallet</span><span style="color: #89b4fa;">)</span>: <span style="color: #89b4fa;">(</span><span style="color: #f38ba8;">u128</span>, <span style="color: #f38ba8;">vector</span>&lt;<span style="color: #f38ba8;">u8</span>&gt;<span style="color: #89b4fa;">)</span> <span style="color: #89b4fa;">{</span>
+    <span style="color: #f2cdcd;">(</span>wallet.balance, wallet.name<span style="color: #f2cdcd;">)</span>
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0c12088" class="outline-3">
+<h3 id="org0c12088"><span class="section-number-3">3.3.</span> Update</h3>
+<div class="outline-text-3" id="text-3-3">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">public</span> <span style="color: #cba6f7;">entry</span> <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">update_balance</span><span style="color: #89b4fa;">(</span><span style="color: #f2cdcd;">wallet</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">Wallet</span>, <span style="color: #f2cdcd;">balance</span>: <span style="color: #f38ba8;">u128</span><span style="color: #89b4fa;">)</span> <span style="color: #89b4fa;">{</span>
+    wallet.balance = balance;
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org3c91857" class="outline-3">
+<h3 id="org3c91857"><span class="section-number-3">3.4.</span> Delete</h3>
+<div class="outline-text-3" id="text-3-4">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">public</span> <span style="color: #cba6f7;">entry</span> <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">delete_wallet</span><span style="color: #89b4fa;">(</span><span style="color: #f2cdcd;">wallet</span>: <span style="color: #f38ba8;">Wallet</span><span style="color: #89b4fa;">)</span> <span style="color: #89b4fa;">{</span>
+    <span style="color: #cba6f7;">let</span> <span style="color: #f38ba8;">Wallet</span> <span style="color: #f2cdcd;">{</span>id, <span style="color: #f2cdcd;">balance</span>:_, <span style="color: #f2cdcd;">name</span>: _<span style="color: #f2cdcd;">}</span> = wallet;
+    <span style="color: #f9e2af; font-weight: bold;">object</span>::delete<span style="color: #f2cdcd;">(</span>id<span style="color: #f2cdcd;">)</span>;
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgff980fe" class="outline-3">
+<h3 id="orgff980fe"><span class="section-number-3">3.5.</span> Change type of Ownership</h3>
+<div class="outline-text-3" id="text-3-5">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">public</span> <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">change_to_share_object</span><span style="color: #89b4fa;">(</span><span style="color: #f2cdcd;">wallet</span>: <span style="color: #f38ba8;">Wallet</span><span style="color: #89b4fa;">)</span> <span style="color: #89b4fa;">{</span>
+    <span style="color: #f9e2af; font-weight: bold;">transfer</span>::share_object<span style="color: #f2cdcd;">(</span>wallet<span style="color: #f2cdcd;">)</span>;
+<span style="color: #89b4fa;">}</span>
+
+<span style="color: #cba6f7;">public</span> <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">change_to_freeze_object</span><span style="color: #89b4fa;">(</span><span style="color: #f2cdcd;">wallet</span>: <span style="color: #f38ba8;">Wallet</span><span style="color: #89b4fa;">)</span> <span style="color: #89b4fa;">{</span>
+    <span style="color: #f9e2af; font-weight: bold;">transfer</span>::freeze_object<span style="color: #f2cdcd;">(</span>wallet<span style="color: #f2cdcd;">)</span>;
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc63c56b" class="outline-2">
+<h2 id="orgc63c56b"><span class="section-number-2">4.</span> Flexible Objects</h2>
+<div class="outline-text-2" id="text-4">
+</div>
+<div id="outline-container-orgba0027c" class="outline-3">
+<h3 id="orgba0027c"><span class="section-number-3">4.1.</span> Wrapping object</h3>
+<div class="outline-text-3" id="text-4-1">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">module</span> <span style="color: #f9e2af; font-weight: bold;">eamon</span>::<span style="color: #f38ba8;">EAMON</span> <span style="color: #89b4fa;">{</span>
+    <span style="color: #cba6f7;">use</span> <span style="color: #f9e2af; font-weight: bold;">sui</span>::dynamic_object_field <span style="color: #cba6f7;">as</span> ofield;
+    <span style="color: #cba6f7;">use</span> <span style="color: #f9e2af; font-weight: bold;">sui</span>::<span style="color: #f9e2af; font-weight: bold;">object</span>::<span style="color: #f2cdcd;">{</span><span style="color: #f38ba8;">Self</span>, <span style="color: #f38ba8;">UID</span><span style="color: #f2cdcd;">}</span>;
+    <span style="color: #cba6f7;">use</span> <span style="color: #f9e2af; font-weight: bold;">sui</span>::<span style="color: #f9e2af; font-weight: bold;">tx_context</span>::<span style="color: #f2cdcd;">{</span><span style="color: #f38ba8;">Self</span>,<span style="color: #f38ba8;">TxContext</span><span style="color: #f2cdcd;">}</span>
+    <span style="color: #cba6f7;">use</span> <span style="color: #f9e2af; font-weight: bold;">sui</span>::transfer;
+
+    <span style="color: #cba6f7;">struct</span> <span style="color: #f38ba8;">Bank</span> <span style="color: #cba6f7;">has</span> <span style="color: #f38ba8;">key</span> <span style="color: #f2cdcd;">{</span>
+        <span style="color: #f2cdcd;">id</span>: <span style="color: #f38ba8;">UID</span>,
+        <span style="color: #f2cdcd;">wallets_created</span>: <span style="color: #f38ba8;">u64</span>,
+        <span style="color: #f2cdcd;">users_created</span>: <span style="color: #f38ba8;">u64</span>,
+    <span style="color: #f2cdcd;">}</span>
+
+    <span style="color: #cba6f7;">struct</span> <span style="color: #f38ba8;">Wallet</span> <span style="color: #cba6f7;">has</span> <span style="color: #f38ba8;">key</span>, <span style="color: #f38ba8;">store</span> <span style="color: #f2cdcd;">{</span>
+        <span style="color: #f2cdcd;">id</span>: <span style="color: #f38ba8;">UID</span>,
+        <span style="color: #f2cdcd;">symbol</span>: <span style="color: #f38ba8;">vector</span>&lt;<span style="color: #f38ba8;">u8</span>&gt;,
+        <span style="color: #f2cdcd;">balance</span>: <span style="color: #f38ba8;">u64</span>,
+    <span style="color: #f2cdcd;">}</span>
+
+    <span style="color: #cba6f7;">struct</span> <span style="color: #f38ba8;">User</span> <span style="color: #cba6f7;">has</span> <span style="color: #f38ba8;">key</span>, <span style="color: #f38ba8;">store</span> <span style="color: #f2cdcd;">{</span>
+        <span style="color: #f2cdcd;">id</span>: <span style="color: #f38ba8;">UID</span>,
+        <span style="color: #f2cdcd;">wallet</span>: <span style="color: #f38ba8;">Wallet</span>,
+        <span style="color: #f2cdcd;">intended_address</span>: <span style="color: #f38ba8;">address</span>,
+    <span style="color: #f2cdcd;">}</span>
+
+    <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">init</span><span style="color: #f2cdcd;">(</span><span style="color: #f2cdcd;">ctx</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">TxContext</span><span style="color: #f2cdcd;">)</span> <span style="color: #f2cdcd;">{</span>
+        <span style="color: #cba6f7;">let</span> <span style="color: #f2cdcd;">bank</span> = <span style="color: #f38ba8;">Bank</span><span style="color: #f38ba8;">{</span>
+            <span style="color: #f2cdcd;">id</span>: <span style="color: #f9e2af; font-weight: bold;">object</span>::new<span style="color: #89dceb;">(</span>ctx<span style="color: #89dceb;">)</span>,
+            <span style="color: #f2cdcd;">wallets_created</span>: 0,
+            <span style="color: #f2cdcd;">users_created</span>: 0,
+        <span style="color: #f38ba8;">}</span>;
+
+        <span style="color: #f9e2af; font-weight: bold;">transfer</span>::transfer<span style="color: #f38ba8;">(</span>bank, <span style="color: #f9e2af; font-weight: bold;">tx_context</span>::sender<span style="color: #89dceb;">(</span>ctx<span style="color: #89dceb;">)</span><span style="color: #f38ba8;">)</span>;
+    <span style="color: #f2cdcd;">}</span>
+
+    <span style="color: #cba6f7;">public</span> <span style="color: #cba6f7;">entry</span> <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">create_wallet</span><span style="color: #f2cdcd;">(</span><span style="color: #f2cdcd;">bank</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">Bank</span>,<span style="color: #f2cdcd;">symbol</span>: <span style="color: #f38ba8;">vector</span>&lt;<span style="color: #f38ba8;">u8</span>&gt;, <span style="color: #f2cdcd;">balance</span>: <span style="color: #f38ba8;">u64</span>, <span style="color: #f2cdcd;">ctx</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">TxContext</span><span style="color: #f2cdcd;">)</span> <span style="color: #f2cdcd;">{</span>
+
+        <span style="color: #cba6f7;">let</span> <span style="color: #f2cdcd;">wallet</span> = <span style="color: #f38ba8;">Wallet</span><span style="color: #f38ba8;">{</span><span style="color: #f2cdcd;">id</span>: <span style="color: #f9e2af; font-weight: bold;">object</span>::new<span style="color: #89dceb;">(</span>ctx<span style="color: #89dceb;">)</span>,
+            symbol,
+            balance,
+        <span style="color: #f38ba8;">}</span>;
+        bank.wallets_created = bank.wallets_created + 1;
+        <span style="color: #f9e2af; font-weight: bold;">transfer</span>::transfer<span style="color: #f38ba8;">(</span>wallet, <span style="color: #f9e2af; font-weight: bold;">tx_context</span>::sender<span style="color: #89dceb;">(</span>ctx<span style="color: #89dceb;">)</span><span style="color: #f38ba8;">)</span>;
+    <span style="color: #f2cdcd;">}</span>
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4f737ea" class="outline-3">
+<h3 id="org4f737ea"><span class="section-number-3">4.2.</span> Wrap</h3>
+<div class="outline-text-3" id="text-4-2">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">public</span> <span style="color: #cba6f7;">entry</span> <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">request_wallet</span><span style="color: #89b4fa;">(</span><span style="color: #f2cdcd;">bank</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">Bank</span>, <span style="color: #f2cdcd;">intended_address</span>: <span style="color: #f38ba8;">address</span>, <span style="color: #f2cdcd;">wallet</span>: <span style="color: #f38ba8;">Wallet</span>, <span style="color: #f2cdcd;">ctx</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">TxContext</span><span style="color: #89b4fa;">)</span> <span style="color: #89b4fa;">{</span>
+    <span style="color: #cba6f7;">let</span> <span style="color: #f2cdcd;">user</span> = <span style="color: #f38ba8;">User</span><span style="color: #f2cdcd;">{</span>
+        <span style="color: #f2cdcd;">id</span>: <span style="color: #f9e2af; font-weight: bold;">object</span>::new<span style="color: #f38ba8;">(</span>ctx<span style="color: #f38ba8;">)</span>,
+        wallet,
+        intended_address,
+    <span style="color: #f2cdcd;">}</span>;
+    bank.users_created = bank.users_created + 1;
+    <span style="color: #f9e2af; font-weight: bold;">transfer</span>::transfer<span style="color: #f2cdcd;">(</span>user, intended_address<span style="color: #f2cdcd;">)</span>;
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org633811c" class="outline-3">
+<h3 id="org633811c"><span class="section-number-3">4.3.</span> Unwrap</h3>
+<div class="outline-text-3" id="text-4-3">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">public</span> <span style="color: #cba6f7;">entry</span> <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">unpack_wallet</span><span style="color: #89b4fa;">(</span><span style="color: #f2cdcd;">user</span>: <span style="color: #f38ba8;">User</span>, <span style="color: #f2cdcd;">ctx</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">TxContext</span><span style="color: #89b4fa;">)</span> <span style="color: #89b4fa;">{</span>
+    <span style="color: #cba6f7;">let</span> <span style="color: #f38ba8;">User</span> <span style="color: #f2cdcd;">{</span>
+        id,
+        wallet,
+        <span style="color: #f2cdcd;">intended_address</span>: _,
+    <span style="color: #f2cdcd;">}</span> = us
+        <span style="color: #f9e2af; font-weight: bold;">transfer</span>::transfer<span style="color: #f2cdcd;">(</span>wallet, <span style="color: #f9e2af; font-weight: bold;">tx_context</span>::sender<span style="color: #f38ba8;">(</span>ctx<span style="color: #f38ba8;">)</span><span style="color: #f2cdcd;">)</span>;
+    <span style="color: #f9e2af; font-weight: bold;">object</span>::delete<span style="color: #f2cdcd;">(</span>id<span style="color: #f2cdcd;">)</span>;
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org661b6b1" class="outline-2">
+<h2 id="org661b6b1"><span class="section-number-2">5.</span> Dynamic Objects</h2>
+<div class="outline-text-2" id="text-5">
+</div>
+<div id="outline-container-orga05bd03" class="outline-3">
+<h3 id="orga05bd03"><span class="section-number-3">5.1.</span> Dynamic Object Field</h3>
+<div class="outline-text-3" id="text-5-1">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">use</span> <span style="color: #f9e2af; font-weight: bold;">sui</span>::dynamic_object_field <span style="color: #cba6f7;">as</span> ofield;
+
+<span style="color: #cba6f7;">public</span> <span style="color: #cba6f7;">entry</span> <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">mutable_symbol_wallet</span><span style="color: #89b4fa;">(</span><span style="color: #f2cdcd;">wallet</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">Wallet</span>, <span style="color: #f2cdcd;">symbol</span>: <span style="color: #f38ba8;">vector</span>&lt;<span style="color: #f38ba8;">u8</span>&gt;<span style="color: #89b4fa;">)</span> <span style="color: #89b4fa;">{</span>
+    wallet.symbol = symbol;
+<span style="color: #89b4fa;">}</span>
+
+<span style="color: #cba6f7;">public</span> <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">add_new_wallet</span><span style="color: #89b4fa;">(</span><span style="color: #f2cdcd;">user</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">User</span>, <span style="color: #f2cdcd;">wallet</span>: <span style="color: #f38ba8;">Wallet</span>, <span style="color: #f2cdcd;">name</span>: <span style="color: #f38ba8;">vector</span>&lt;<span style="color: #f38ba8;">u8</span>&gt;<span style="color: #89b4fa;">)</span> <span style="color: #89b4fa;">{</span>
+    <span style="color: #f9e2af; font-weight: bold;">ofield</span>::add<span style="color: #f2cdcd;">(</span>&amp;<span style="color: #cba6f7;">mut</span> user.id, name, wallet<span style="color: #f2cdcd;">)</span>;
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7acda9c" class="outline-3">
+<h3 id="org7acda9c"><span class="section-number-3">5.2.</span> Mutate Dynamic Object</h3>
+<div class="outline-text-3" id="text-5-2">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">public</span> <span style="color: #cba6f7;">entry</span> <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">mutate_symbol_wallet_via_user</span><span style="color: #89b4fa;">(</span><span style="color: #f2cdcd;">user</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">User</span>, <span style="color: #f2cdcd;">wallet_name</span>: <span style="color: #f38ba8;">vector</span>&lt;<span style="color: #f38ba8;">u8</span>&gt;, <span style="color: #f2cdcd;">symbol</span>: <span style="color: #f38ba8;">vector</span>&lt;<span style="color: #f38ba8;">u8</span>&gt;<span style="color: #89b4fa;">)</span> <span style="color: #89b4fa;">{</span>
+    mutable_symbol_wallet<span style="color: #f2cdcd;">(</span><span style="color: #f9e2af; font-weight: bold;">ofield</span>::borrow_mut&lt;<span style="color: #f38ba8;">vector</span>&lt;<span style="color: #f38ba8;">u8</span>&gt;, <span style="color: #f38ba8;">Wallet</span>&gt;<span style="color: #f38ba8;">(</span>
+        &amp;<span style="color: #cba6f7;">mut</span> user.id,
+        wallet_name,
+    <span style="color: #f38ba8;">)</span>, symbol<span style="color: #f2cdcd;">)</span>;
+<span style="color: #89b4fa;">}</span>
+
+<span style="color: #cba6f7;">public</span> <span style="color: #cba6f7;">entry</span> <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">delete_wallet</span><span style="color: #89b4fa;">(</span><span style="color: #f2cdcd;">user</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">User</span>, <span style="color: #f2cdcd;">wallet_name</span>: <span style="color: #f38ba8;">vector</span>&lt;<span style="color: #f38ba8;">u8</span>&gt;<span style="color: #89b4fa;">)</span> <span style="color: #89b4fa;">{</span>
+    <span style="color: #cba6f7;">let</span> <span style="color: #f38ba8;">Wallet</span> <span style="color: #f2cdcd;">{</span> id,
+        <span style="color: #f2cdcd;">symbol</span>: _,
+        <span style="color: #f2cdcd;">balance</span>: _
+    <span style="color: #f2cdcd;">}</span> = <span style="color: #f9e2af; font-weight: bold;">ofield</span>::remove&lt;<span style="color: #f38ba8;">vector</span>&lt;<span style="color: #f38ba8;">u8</span>&gt;, <span style="color: #f38ba8;">Wallet</span>&gt;<span style="color: #f2cdcd;">(</span>
+        &amp;<span style="color: #cba6f7;">mut</span> user.id,
+        wallet_name,
+    <span style="color: #f2cdcd;">)</span>;
+    <span style="color: #f9e2af; font-weight: bold;">object</span>::delete<span style="color: #f2cdcd;">(</span>id<span style="color: #f2cdcd;">)</span>;
+<span style="color: #89b4fa;">}</span>
+
+<span style="color: #cba6f7;">public</span> <span style="color: #cba6f7;">entry</span> <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">reclaim_wallet</span><span style="color: #89b4fa;">(</span><span style="color: #f2cdcd;">user</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">User</span>, <span style="color: #f2cdcd;">wallet_name</span>: <span style="color: #f38ba8;">vector</span>&lt;<span style="color: #f38ba8;">u8</span>&gt;, <span style="color: #f2cdcd;">ctx</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">TxContext</span><span style="color: #89b4fa;">)</span> <span style="color: #89b4fa;">{</span>
+    <span style="color: #cba6f7;">let</span> <span style="color: #f2cdcd;">wallet</span> = <span style="color: #f9e2af; font-weight: bold;">ofield</span>::remove&lt;<span style="color: #f38ba8;">vector</span>&lt;<span style="color: #f38ba8;">u8</span>&gt;, <span style="color: #f38ba8;">Wallet</span>&gt;<span style="color: #f2cdcd;">(</span>
+        &amp;<span style="color: #cba6f7;">mut</span> user.id,
+        wallet_name,
+
+        <span style="color: #f9e2af; font-weight: bold;">transfer</span>::transfer<span style="color: #f38ba8;">(</span>wallet, <span style="color: #f9e2af; font-weight: bold;">tx_context</span>::sender<span style="color: #89dceb;">(</span>ctx<span style="color: #89dceb;">)</span><span style="color: #f38ba8;">)</span>;
+<span style="color: #11111b; background-color: #f38ba8;">}</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2a5ddb1" class="outline-2">
+<h2 id="org2a5ddb1"><span class="section-number-2">6.</span> Generic Styles</h2>
+<div class="outline-text-2" id="text-6">
+</div>
+<div id="outline-container-org8579a45" class="outline-3">
+<h3 id="org8579a45"><span class="section-number-3">6.1.</span> In Rust</h3>
+<div class="outline-text-3" id="text-6-1">
+<div class="org-src-container">
+<pre class="src src-rust"><span style="color: #cba6f7;">struct</span> <span style="color: #f38ba8;">Gene</span><span style="color: #89b4fa;">&lt;</span><span style="color: #f5c2e7; font-style: italic;">T</span><span style="color: #89b4fa;">&gt;</span> <span style="color: #89b4fa;">{</span>
+  <span style="color: #f5e0dc; font-style: italic;">name</span>: <span style="color: #f38ba8;">T</span>
+<span style="color: #89b4fa;">}</span>
+
+<span style="color: #cba6f7;">impl</span><span style="color: #89b4fa;">&lt;</span><span style="color: #f5c2e7; font-style: italic;">T</span><span style="color: #89b4fa;">&gt;</span> <span style="color: #f38ba8;">Gene</span><span style="color: #89b4fa;">&lt;</span><span style="color: #a6adc8;">T</span><span style="color: #89b4fa;">&gt;</span> <span style="color: #89b4fa;">{</span>
+  <span style="color: #cba6f7;">pub</span> <span style="color: #cba6f7;">fn</span> <span style="color: #89b4fa;">new_gene</span><span style="color: #f2cdcd;">(</span><span style="color: #f5c2e7; font-style: italic;">name</span>: <span style="color: #f38ba8;">T</span><span style="color: #f2cdcd;">)</span> -&gt; <span style="color: #f38ba8;">Gene</span><span style="color: #f2cdcd;">&lt;</span><span style="color: #a6adc8;">T</span><span style="color: #f2cdcd;">&gt;</span> <span style="color: #f2cdcd;">{</span>
+    <span style="color: #f38ba8;">Gene</span> <span style="color: #f38ba8;">{</span>
+      <span style="color: #f5e0dc;">name</span>: name
+    <span style="color: #f38ba8;">}</span>
+  <span style="color: #f2cdcd;">}</span>
+<span style="color: #89b4fa;">}</span>
+
+<span style="color: #cba6f7;">fn</span> <span style="color: #89b4fa;">main</span><span style="color: #89b4fa;">()</span> <span style="color: #89b4fa;">{</span>
+  <span style="color: #cba6f7;">let</span> <span style="color: #f2cdcd;">gene</span> <span style="color: #74c7ec;">=</span> <span style="color: #f38ba8; font-weight: bold;">Gene</span><span style="color: #cdd6f4;">::</span><span style="color: #89b4fa;">new_gene</span><span style="color: #f2cdcd;">(</span><span style="color: #a6e3a1; font-style: italic;">"gene"</span><span style="color: #f2cdcd;">)</span><span style="color: #cdd6f4;">;</span>
+  <span style="color: #74c7ec;">println!</span><span style="color: #f2cdcd;">(</span><span style="color: #a6e3a1; font-style: italic;">"gene name: {}"</span>, gene.name<span style="color: #f2cdcd;">)</span><span style="color: #cdd6f4;">;</span>
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb4cc4ff" class="outline-3">
+<h3 id="orgb4cc4ff"><span class="section-number-3">6.2.</span> In Sui Move</h3>
+<div class="outline-text-3" id="text-6-2">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #cba6f7;">module</span> <span style="color: #f9e2af; font-weight: bold;">eamon</span>::<span style="color: #f38ba8;">EAMON</span> <span style="color: #89b4fa;">{</span>
+    <span style="color: #cba6f7;">struct</span> <span style="color: #f38ba8;">Wallet</span>&lt;<span style="color: #f38ba8;">T</span>: <span style="color: #f38ba8;">store</span> + <span style="color: #f38ba8;">drop</span>&gt; <span style="color: #cba6f7;">has</span> <span style="color: #f38ba8;">key</span>, <span style="color: #f38ba8;">store</span> <span style="color: #f2cdcd;">{</span>
+        <span style="color: #f2cdcd;">value</span>: <span style="color: #f38ba8;">T</span>
+    <span style="color: #f2cdcd;">}</span>
+
+    <span style="color: #cba6f7;">public</span> <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">create_wallet</span>&lt;<span style="color: #f38ba8;">T</span>&gt;<span style="color: #f2cdcd;">(</span><span style="color: #f2cdcd;">value</span>: <span style="color: #f38ba8;">T</span><span style="color: #f2cdcd;">)</span>: <span style="color: #f38ba8;">Wallet</span>&lt;<span style="color: #f38ba8;">T</span>&gt; <span style="color: #f2cdcd;">{</span>
+        <span style="color: #f38ba8;">Wallet</span>&lt;<span style="color: #f38ba8;">T</span>&gt; <span style="color: #f38ba8;">{</span> value <span style="color: #f38ba8;">}</span>
+    <span style="color: #f2cdcd;">}</span>
+
+    <span style="color: #cba6f7;">let</span> <span style="color: #f2cdcd;">u64_wallet</span> = <span style="color: #f38ba8;">Storage</span>::create_wallet&lt;<span style="color: #f38ba8;">u64</span>&gt;<span style="color: #f2cdcd;">(</span>1000000<span style="color: #f2cdcd;">)</span>;
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7064433" class="outline-2">
+<h2 id="org7064433"><span class="section-number-2">7.</span> Witness</h2>
+<div class="outline-text-2" id="text-7">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #9399b2;">/// Module that defines a generic type `Guardian&lt;T&gt;` which can only be</span>
+<span style="color: #9399b2;">/// instantiated with a witness.</span>
+<span style="color: #cba6f7;">module</span> <span style="color: #f9e2af; font-weight: bold;">witness</span>::<span style="color: #f38ba8;">EAMON</span> <span style="color: #89b4fa;">{</span>
+    <span style="color: #cba6f7;">use</span> <span style="color: #f9e2af; font-weight: bold;">sui</span>::<span style="color: #f9e2af; font-weight: bold;">object</span>::<span style="color: #f2cdcd;">{</span><span style="color: #f38ba8;">Self</span>, <span style="color: #f38ba8;">UID</span><span style="color: #f2cdcd;">}</span>;
+    <span style="color: #cba6f7;">use</span> <span style="color: #f9e2af; font-weight: bold;">sui</span>::transfer;
+    <span style="color: #cba6f7;">use</span> <span style="color: #f9e2af; font-weight: bold;">sui</span>::<span style="color: #f9e2af; font-weight: bold;">tx_context</span>::<span style="color: #f2cdcd;">{</span><span style="color: #f38ba8;">Self</span>, <span style="color: #f38ba8;">TxContext</span><span style="color: #f2cdcd;">}</span>;
+
+    <span style="color: #9399b2;">/// Phantom parameter T can only be initialized in the `create_guardian`</span>
+    <span style="color: #9399b2;">/// function. But the types passed here must have `drop`.</span>
+    <span style="color: #cba6f7;">struct</span> <span style="color: #f38ba8;">Guardian</span>&lt;<span style="color: #cba6f7;">phantom</span> <span style="color: #f38ba8;">T</span>: <span style="color: #f38ba8;">drop</span>&gt; <span style="color: #cba6f7;">has</span> <span style="color: #f38ba8;">key</span>, <span style="color: #f38ba8;">store</span> <span style="color: #f2cdcd;">{</span>
+        <span style="color: #f2cdcd;">id</span>: <span style="color: #f38ba8;">UID</span>
+    <span style="color: #f2cdcd;">}</span>
+
+    <span style="color: #9399b2;">/// This type is the witness resource and is intended to be used only once.</span>
+    <span style="color: #cba6f7;">struct</span> <span style="color: #f38ba8;">PEACE</span> <span style="color: #cba6f7;">has</span> <span style="color: #f38ba8;">drop</span> <span style="color: #f2cdcd;">{}</span>
+
+    <span style="color: #9399b2;">/// The first argument of this function is an actual instance of the</span>
+    <span style="color: #9399b2;">/// type T with `drop` ability. It is dropped as soon as received.</span>
+    <span style="color: #cba6f7;">public</span> <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">create_guardian</span>&lt;<span style="color: #f38ba8;">T</span>: <span style="color: #f38ba8;">drop</span>&gt;<span style="color: #f2cdcd;">(</span><span style="color: #f2cdcd;">_witness</span>: <span style="color: #f38ba8;">T</span>, <span style="color: #f2cdcd;">ctx</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">TxContext</span><span style="color: #f2cdcd;">)</span>: <span style="color: #f38ba8;">Guardian</span>&lt;<span style="color: #f38ba8;">T</span>&gt; <span style="color: #f2cdcd;">{</span>
+        <span style="color: #f38ba8;">Guardian</span> <span style="color: #f38ba8;">{</span> <span style="color: #f2cdcd;">id</span>: <span style="color: #f9e2af; font-weight: bold;">object</span>::new<span style="color: #89dceb;">(</span>ctx<span style="color: #89dceb;">)</span> <span style="color: #f38ba8;">}</span>
+    <span style="color: #f2cdcd;">}</span>
+
+    <span style="color: #9399b2;">/// Module initializer is the best way to ensure that the</span>
+    <span style="color: #9399b2;">/// code is called only once. With `Witness` pattern it is</span>
+    <span style="color: #9399b2;">/// often the best practice.</span>
+    <span style="color: #cba6f7;">fun</span> <span style="color: #89b4fa;">init</span><span style="color: #f2cdcd;">(</span><span style="color: #f2cdcd;">witness</span>: <span style="color: #f38ba8;">PEACE</span>, <span style="color: #f2cdcd;">ctx</span>: &amp;<span style="color: #cba6f7;">mut</span> <span style="color: #f38ba8;">TxContext</span><span style="color: #f2cdcd;">)</span> <span style="color: #f2cdcd;">{</span>
+        <span style="color: #f9e2af; font-weight: bold;">transfer</span>::transfer<span style="color: #f38ba8;">(</span>
+            create_guardian<span style="color: #89dceb;">(</span>witness, ctx<span style="color: #89dceb;">)</span>,
+            <span style="color: #f9e2af; font-weight: bold;">tx_context</span>::sender<span style="color: #89dceb;">(</span>ctx<span style="color: #89dceb;">)</span>
+        <span style="color: #f38ba8;">)</span>
+    <span style="color: #f2cdcd;">}</span>
+<span style="color: #89b4fa;">}</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Dang Quang Vu</p>
+<p class="date">Created: 2023-10-01 Sun 19:15</p>
+</div>
+</body>
+</html>
